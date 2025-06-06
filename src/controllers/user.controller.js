@@ -33,9 +33,9 @@ const registerUser = asyncHandler(async (req, res, next) => {
     const existedUser = await User.findOne({ 
         $or: [{ email }, { username }] 
     })
-
+    
     if(existedUser) {
-        throw new ApiError(400, "User already exists with this email or username");
+        throw new ApiError(489, "User already exists with this email or username");
     }
 
     // check for images and avatar 
