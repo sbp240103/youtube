@@ -3,6 +3,7 @@ import {ApiError} from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import {uploadOnCloudinary} from "../utils/cloudinary.js";     
 import {ApiResponse} from "../utils/ApiResponse.js";
+
 const registerUser = asyncHandler(async (req, res, next) => {
     // get user details from frontend
     // validation - not empty
@@ -29,7 +30,7 @@ const registerUser = asyncHandler(async (req, res, next) => {
     }
 
     // check if user already exists
-    const existedUser = User.findOne({ 
+    const existedUser = await User.findOne({ 
         $or: [{ email }, { username }] 
     })
 
@@ -51,8 +52,8 @@ const registerUser = asyncHandler(async (req, res, next) => {
     if(!avatar) {
         throw new ApiError(500, "Failed to upload avatar to cloudinary");
     }
-
-    User.create({
+    console.log("avatar", avatar);
+    const user = await User.create({
         fullName,
         avatar: avatar.url,
         coverImage: coverImage?.url || "",
@@ -61,7 +62,7 @@ const registerUser = asyncHandler(async (req, res, next) => {
         username: username.toLowerCase()
     })
 
-    const createdUser = await User.findOne(user._id).select("-password -refreshToken");
+    const createdUser = await User.findById(user._id).select("-password -refreshToken");
 
     if(!createdUser) {
         throw new ApiError(500, "Failed to create user");
