@@ -154,8 +154,8 @@ const logoutUser = asyncHandler(async (req, res, next) => {
     await User.findByIdAndUpdate(
         req.user._id,
         {
-            $set:{
-                refreshToken:undefined
+            $unset:{
+                refreshToken:1
             }
         },
         {
@@ -179,7 +179,7 @@ const logoutUser = asyncHandler(async (req, res, next) => {
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
     const incommingRefreshToken = req.cookies.refreshToken = req.cookies.refreshToken || req.body.refreshToken
-    
+    console.log(incommingRefreshToken); 
     if(!incommingRefreshToken) {
         throw new ApiError(401, "Refresh token is required");
     }
@@ -190,9 +190,9 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
             process.env.REFRESH_TOKEN_SECRET,
         )
     
-    
-        const user = User.findById(decodedToken?._id)
-    
+        
+        const user = await User.findById(decodedToken?._id)
+        
         if(!user) {
             throw new ApiError(404, "invalid refresh token");
         }
@@ -337,7 +337,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
     if(!username) {
         throw new ApiError(400, "Username is required");
     }
-
+    console.log("username", username);
     const channel = await User.aggregate([
         {
             $match:{
